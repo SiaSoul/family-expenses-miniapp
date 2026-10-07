@@ -1279,9 +1279,21 @@
       }
 
       expenses =
-        data.expenses || [];
+  data.expenses || [];
 
-      renderExpenses();
+console.log('EXPENSES FROM API:', expenses);
+
+expenses.forEach((item, index) => {
+  console.log(
+    'EXPENSE',
+    index,
+    'row=', item.row,
+    'date=', item.date,
+    'type=', typeof item.date
+  );
+});
+
+renderExpenses();
 
     } catch (error) {
       expensesList.innerHTML =
