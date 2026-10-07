@@ -902,25 +902,66 @@
   }
 
 
-  function formatDateHuman(dateString) {
-    const [year, month, day] =
-      dateString.split('-').map(Number);
+ function formatDateHuman(dateString) {
+  if (!dateString) {
+    return 'Дата не указана';
+  }
 
-    const date = new Date(
-      year,
-      month - 1,
-      day
+  const text = String(dateString).trim();
+
+  let year;
+  let month;
+  let day;
+
+  // YYYY-MM-DD
+  let match = text.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (match) {
+    year = Number(match[1]);
+    month = Number(match[2]);
+    day = Number(match[3]);
+  }
+
+  // DD.MM.YYYY
+  if (!match) {
+    match = text.match(
+      /^(\d{2})\.(\d{2})\.(\d{4})$/
     );
 
-    return new Intl.DateTimeFormat(
-      'ru-RU',
-      {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      }
-    ).format(date);
+    if (match) {
+      day = Number(match[1]);
+      month = Number(match[2]);
+      year = Number(match[3]);
+    }
   }
+
+  if (!year || !month || !day) {
+    console.warn('Некорректная дата:', dateString);
+    return text;
+  }
+
+  const date = new Date(
+    year,
+    month - 1,
+    day
+  );
+
+  if (Number.isNaN(date.getTime())) {
+    console.warn('Invalid Date:', dateString);
+    return text;
+  }
+
+  return new Intl.DateTimeFormat(
+    'ru-RU',
+    {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }
+  ).format(date);
+}
 
 
   amountInput.addEventListener('input', () => {
