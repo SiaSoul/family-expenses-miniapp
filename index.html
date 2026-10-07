@@ -483,17 +483,89 @@
   </section>
 
 
-  <section id="expensesScreen" class="screen">
+<section id="expensesScreen" class="screen">
 
-    <h2>Расходы</h2>
+  <h2>Расходы</h2>
 
-    <div id="expensesLoading" class="loading">
-      Загружаю расходы…
+  <div class="filters-card">
+
+    <div class="quick-filters">
+      <button type="button" class="quick-filter" data-period="today">
+        Сегодня
+      </button>
+
+      <button type="button" class="quick-filter" data-period="7days">
+        7 дней
+      </button>
+
+      <button type="button" class="quick-filter active" data-period="month">
+        Месяц
+      </button>
+
+      <button type="button" class="quick-filter" data-period="custom">
+        Период
+      </button>
     </div>
 
-    <div id="expensesList"></div>
+    <div id="customPeriod" class="custom-period">
+      <div>
+        <label for="filterFrom">С</label>
+        <input id="filterFrom" type="date">
+      </div>
 
-  </section>
+      <div>
+        <label for="filterTo">По</label>
+        <input id="filterTo" type="date">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="filterCategory">Категория</label>
+
+      <select id="filterCategory">
+        <option value="">Все категории</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="filterSearch">Поиск</label>
+
+      <input
+        id="filterSearch"
+        type="search"
+        placeholder="Например: Лента, такси, крем"
+      >
+    </div>
+
+    <div class="filter-actions">
+      <button
+        id="applyFilters"
+        type="button"
+        class="primary-button"
+      >
+        Показать
+      </button>
+
+      <button
+        id="resetFilters"
+        type="button"
+        class="secondary-button"
+      >
+        Сбросить
+      </button>
+    </div>
+
+  </div>
+
+  <div id="expensesSummary" class="expenses-summary"></div>
+
+  <div id="expensesLoading" class="loading">
+    Загружаю расходы…
+  </div>
+
+  <div id="expensesList"></div>
+
+</section>
 
 </div>
 
