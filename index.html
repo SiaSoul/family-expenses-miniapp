@@ -963,69 +963,118 @@
   ).format(date);
 }*/
 
-  function formatDateHuman(dateString) {
-  try {
-    console.log(
-      'formatDateHuman input:',
-      dateString,
-      typeof dateString
-    );
+ function formatDateHuman(dateString) {
+  if (
+    dateString === null ||
+    dateString === undefined ||
+    dateString === ''
+  ) {
+    return 'Без даты';
+  }
 
-    if (
-      dateString === null ||
-      dateString === undefined ||
-      dateString === ''
-    ) {
-      return 'Без даты';
-    }
+  const text = String(dateString).trim();
 
-    const text = String(dateString).trim();
+  const monthNames = [
+    'января',
+    'февраля',
+    'марта',
+    'апреля',
+    'мая',
+    'июня',
+    'июля',
+    'августа',
+    'сентября',
+    'октября',
+    'ноября',
+    'декабря'
+  ];
 
-    // YYYY-MM-DD
-    let match = text.match(
-      /^(\d{4})-(\d{2})-(\d{2})$/
-    );
+  const englishMonths = {
+    Jan: 1,
+    Feb: 2,
+    Mar: 3,
+    Apr: 4,
+    May: 5,
+    Jun: 6,
+    Jul: 7,
+    Aug: 8,
+    Sep: 9,
+    Oct: 10,
+    Nov: 11,
+    Dec: 12
+  };
 
-    if (match) {
-      return `${match[3]}.${match[2]}.${match[1]}`;
-    }
+  let year;
+  let month;
+  let day;
 
-    // DD.MM.YYYY
+  // 2026-09-09
+  let match = text.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (match) {
+    year = Number(match[1]);
+    month = Number(match[2]);
+    day = Number(match[3]);
+  }
+
+  // 09.09.2026
+  if (!year) {
     match = text.match(
       /^(\d{2})\.(\d{2})\.(\d{4})$/
     );
 
     if (match) {
-      return text;
+      day = Number(match[1]);
+      month = Number(match[2]);
+      year = Number(match[3]);
     }
+  }
 
-    // ISO дата типа 2026-10-07T00:00:00.000Z
+  // 2026-09-09T00:00:00...
+  if (!year) {
     match = text.match(
       /^(\d{4})-(\d{2})-(\d{2})T/
     );
 
     if (match) {
-      return `${match[3]}.${match[2]}.${match[1]}`;
+      year = Number(match[1]);
+      month = Number(match[2]);
+      day = Number(match[3]);
     }
+  }
 
+  // Wed Sep 09 2026 00:00:00 GMT+0300 ...
+  if (!year) {
+    match = text.match(
+      /^[A-Za-z]{3}\s+([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/
+    );
+
+    if (match) {
+      month = englishMonths[match[1]];
+      day = Number(match[2]);
+      year = Number(match[3]);
+    }
+  }
+
+  if (
+    !year ||
+    !month ||
+    !day ||
+    month < 1 ||
+    month > 12
+  ) {
     console.warn(
       'Неизвестный формат даты:',
       text
     );
 
     return text;
-
-  } catch (error) {
-    console.error(
-      'formatDateHuman error:',
-      error,
-      dateString
-    );
-
-    return String(dateString ?? '');
   }
-}
 
+  return `${day} ${monthNames[month - 1]} ${year}`;
+}
 
   amountInput.addEventListener('input', () => {
     const total =
