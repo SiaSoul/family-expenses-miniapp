@@ -26,7 +26,6 @@
 
     body {
       margin: 0;
-      padding: 0;
       background: var(--bg);
       color: var(--text);
       font-family:
@@ -41,7 +40,7 @@
     .app {
       max-width: 560px;
       margin: 0 auto;
-      padding: 18px 14px 40px;
+      padding: 16px 14px 90px;
     }
 
     h1 {
@@ -49,11 +48,24 @@
       margin: 4px 0 18px;
     }
 
+    h2 {
+      font-size: 20px;
+      margin: 0 0 14px;
+    }
+
     .card {
       background: var(--card);
       border-radius: 16px;
       padding: 16px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
     }
 
     .field {
@@ -85,12 +97,6 @@
     textarea {
       resize: vertical;
       min-height: 86px;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--accent);
     }
 
     .amount-total {
@@ -142,13 +148,17 @@
       font-weight: 700;
     }
 
+    button {
+      font: inherit;
+    }
+
     .secondary-button,
-    .primary-button {
+    .primary-button,
+    .danger-button {
       width: 100%;
       border: 0;
       border-radius: 12px;
       min-height: 48px;
-      font: inherit;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
@@ -166,9 +176,9 @@
       color: white;
     }
 
-    .primary-button:disabled {
-      opacity: 0.55;
-      cursor: default;
+    .danger-button {
+      background: #fdeceb;
+      color: var(--danger);
     }
 
     .new-subcategory-box {
@@ -202,83 +212,349 @@
       text-align: center;
       color: var(--muted);
     }
+
+    .day-block {
+      margin-bottom: 18px;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      padding: 0 3px;
+    }
+
+    .day-title {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .day-total {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .expense-item {
+      background: white;
+      border-radius: 14px;
+      padding: 13px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+
+    .expense-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .expense-category {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .expense-amount {
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .expense-subcategory,
+    .expense-comment,
+    .expense-type {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .expense-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .icon-button {
+      flex: 1;
+      min-height: 38px;
+      border: 0;
+      border-radius: 10px;
+      background: #eeeeef;
+      cursor: pointer;
+    }
+
+    .delete-icon {
+      color: var(--danger);
+      background: #fdeceb;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.96);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 10;
+    }
+
+    .bottom-nav-inner {
+      width: 100%;
+      max-width: 560px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .nav-button {
+      border: 0;
+      background: transparent;
+      min-height: 62px;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .nav-button.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 20;
+      padding: 20px 14px;
+      overflow-y: auto;
+    }
+
+    .modal-backdrop.open {
+      display: block;
+    }
+
+    .modal {
+      max-width: 560px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
 <body>
 
 <div class="app">
+
   <h1>Семейный бюджет</h1>
 
-  <div class="card">
+  <section id="addScreen" class="screen active">
+    <div class="card">
 
-    <div id="loading" class="loading">
-      Загружаю справочники…
-    </div>
-
-    <form id="expenseForm" style="display:none;">
-
-      <div class="field">
-        <label for="date">Дата</label>
-        <input id="date" type="date" required />
+      <div id="loading" class="loading">
+        Загружаю справочники…
       </div>
 
-      <div class="field">
-        <label for="category">Категория</label>
-        <select id="category" required>
-          <option value="">Выберите категорию</option>
-        </select>
-      </div>
+      <form id="expenseForm" style="display:none;">
 
-      <div class="field">
-        <label for="subcategory">Подкатегория</label>
+        <div class="field">
+          <label for="date">Дата</label>
+          <input id="date" type="date" required />
+        </div>
 
-        <select id="subcategory">
-          <option value="">Без подкатегории</option>
-        </select>
+        <div class="field">
+          <label for="category">Категория</label>
+          <select id="category" required>
+            <option value="">Выберите категорию</option>
+          </select>
+        </div>
 
-        <button
-          type="button"
-          class="secondary-button"
-          id="showNewSubcategory"
-        >
-          + Новая подкатегория
-        </button>
+        <div class="field">
+          <label for="subcategory">Подкатегория</label>
 
-        <div id="newSubcategoryBox" class="new-subcategory-box">
-          <input
-            id="newSubcategory"
-            type="text"
-            placeholder="Название новой подкатегории"
-          />
+          <select id="subcategory">
+            <option value="">Без подкатегории</option>
+          </select>
 
           <button
             type="button"
             class="secondary-button"
-            id="saveNewSubcategory"
+            id="showNewSubcategory"
           >
-            Сохранить подкатегорию
+            + Новая подкатегория
           </button>
+
+          <div id="newSubcategoryBox" class="new-subcategory-box">
+            <input
+              id="newSubcategory"
+              type="text"
+              placeholder="Название новой подкатегории"
+            />
+
+            <button
+              type="button"
+              class="secondary-button"
+              id="saveNewSubcategory"
+            >
+              Сохранить подкатегорию
+            </button>
+          </div>
         </div>
+
+        <div class="field">
+          <label for="amount">Сумма</label>
+
+          <input
+            id="amount"
+            type="text"
+            inputmode="decimal"
+            placeholder="Например: 85 + 85 + 55 + 65"
+            autocomplete="off"
+            required
+          />
+
+          <div id="amountTotal" class="amount-total"></div>
+
+          <div class="muted">
+            Можно вводить несколько сумм через +
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Тип расхода</label>
+
+          <div class="radio-group">
+
+            <div class="radio-option">
+              <input
+                type="radio"
+                id="variable"
+                name="expenseType"
+                value="Переменный"
+              />
+              <label for="variable">Переменный</label>
+            </div>
+
+            <div class="radio-option">
+              <input
+                type="radio"
+                id="recurring"
+                name="expenseType"
+                value="Повторяющийся"
+              />
+              <label for="recurring">Повторяющийся</label>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="comment">Комментарий</label>
+
+          <textarea
+            id="comment"
+            placeholder="Необязательно"
+          ></textarea>
+        </div>
+
+        <button
+          id="submitButton"
+          type="submit"
+          class="primary-button"
+        >
+          Добавить расход
+        </button>
+
+        <div id="status" class="status"></div>
+
+      </form>
+    </div>
+  </section>
+
+
+  <section id="expensesScreen" class="screen">
+
+    <h2>Расходы</h2>
+
+    <div id="expensesLoading" class="loading">
+      Загружаю расходы…
+    </div>
+
+    <div id="expensesList"></div>
+
+  </section>
+
+</div>
+
+
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+
+    <button
+      id="navAdd"
+      class="nav-button active"
+      type="button"
+    >
+      ＋ Добавить
+    </button>
+
+    <button
+      id="navExpenses"
+      class="nav-button"
+      type="button"
+    >
+      Расходы
+    </button>
+
+  </div>
+</div>
+
+
+<div id="editModalBackdrop" class="modal-backdrop">
+
+  <div class="modal">
+
+    <h2>Редактировать расход</h2>
+
+    <form id="editForm">
+
+      <input id="editRow" type="hidden" />
+
+      <div class="field">
+        <label for="editDate">Дата</label>
+        <input id="editDate" type="date" required />
       </div>
 
       <div class="field">
-        <label for="amount">Сумма</label>
+        <label for="editCategory">Категория</label>
+        <select id="editCategory" required></select>
+      </div>
 
+      <div class="field">
+        <label for="editSubcategory">Подкатегория</label>
+        <select id="editSubcategory"></select>
+      </div>
+
+      <div class="field">
+        <label for="editAmount">Сумма</label>
         <input
-          id="amount"
+          id="editAmount"
           type="text"
           inputmode="decimal"
-          placeholder="Например: 85 + 85 + 55 + 65"
-          autocomplete="off"
           required
         />
-
-        <div id="amountTotal" class="amount-total"></div>
-
-        <div class="muted">
-          Можно вводить несколько сумм через +
-        </div>
+        <div id="editAmountTotal" class="amount-total"></div>
       </div>
 
       <div class="field">
@@ -289,48 +565,57 @@
           <div class="radio-option">
             <input
               type="radio"
-              id="variable"
-              name="expenseType"
+              id="editVariable"
+              name="editExpenseType"
               value="Переменный"
             />
-            <label for="variable">Переменный</label>
+            <label for="editVariable">Переменный</label>
           </div>
 
           <div class="radio-option">
             <input
               type="radio"
-              id="recurring"
-              name="expenseType"
+              id="editRecurring"
+              name="editExpenseType"
               value="Повторяющийся"
             />
-            <label for="recurring">Повторяющийся</label>
+            <label for="editRecurring">Повторяющийся</label>
           </div>
 
         </div>
       </div>
 
       <div class="field">
-        <label for="comment">Комментарий</label>
-
-        <textarea
-          id="comment"
-          placeholder="Необязательно"
-        ></textarea>
+        <label for="editComment">Комментарий</label>
+        <textarea id="editComment"></textarea>
       </div>
 
-      <button
-        id="submitButton"
-        type="submit"
-        class="primary-button"
-      >
-        Добавить расход
-      </button>
+      <div class="modal-actions">
+        <button
+          type="button"
+          id="cancelEdit"
+          class="secondary-button"
+        >
+          Отмена
+        </button>
 
-      <div id="status" class="status"></div>
+        <button
+          type="submit"
+          id="saveEdit"
+          class="primary-button"
+        >
+          Сохранить
+        </button>
+      </div>
+
+      <div id="editStatus" class="status"></div>
 
     </form>
+
   </div>
+
 </div>
+
 
 <script>
   const API_URL =
@@ -341,6 +626,8 @@
     subcategories: {},
     defaultTypes: {}
   };
+
+  let expenses = [];
 
 
   const tg = window.Telegram?.WebApp;
@@ -379,6 +666,57 @@
   const statusBox =
     document.getElementById('status');
 
+  const addScreen =
+    document.getElementById('addScreen');
+
+  const expensesScreen =
+    document.getElementById('expensesScreen');
+
+  const navAdd =
+    document.getElementById('navAdd');
+
+  const navExpenses =
+    document.getElementById('navExpenses');
+
+  const expensesLoading =
+    document.getElementById('expensesLoading');
+
+  const expensesList =
+    document.getElementById('expensesList');
+
+  const editModalBackdrop =
+    document.getElementById('editModalBackdrop');
+
+  const editForm =
+    document.getElementById('editForm');
+
+  const editRow =
+    document.getElementById('editRow');
+
+  const editDate =
+    document.getElementById('editDate');
+
+  const editCategory =
+    document.getElementById('editCategory');
+
+  const editSubcategory =
+    document.getElementById('editSubcategory');
+
+  const editAmount =
+    document.getElementById('editAmount');
+
+  const editAmountTotal =
+    document.getElementById('editAmountTotal');
+
+  const editComment =
+    document.getElementById('editComment');
+
+  const editStatus =
+    document.getElementById('editStatus');
+
+  const cancelEdit =
+    document.getElementById('cancelEdit');
+
 
   function setToday() {
     const now = new Date();
@@ -403,6 +741,18 @@
   }
 
 
+  function showEditStatus(message, type) {
+    editStatus.textContent = message;
+    editStatus.className = `status ${type}`;
+  }
+
+
+  function clearEditStatus() {
+    editStatus.textContent = '';
+    editStatus.className = 'status';
+  }
+
+
   async function loadReferences() {
     try {
       const response = await fetch(
@@ -416,12 +766,15 @@
       const data = await response.json();
 
       if (!data.ok) {
-        throw new Error(data.error || 'Не удалось загрузить справочники');
+        throw new Error(
+          data.error || 'Не удалось загрузить справочники'
+        );
       }
 
       refs = data;
 
-      fillCategories();
+      fillCategories(categorySelect);
+      fillCategories(editCategory);
 
       loading.style.display = 'none';
       form.style.display = 'block';
@@ -433,22 +786,23 @@
   }
 
 
-  function fillCategories() {
-    categorySelect.innerHTML =
+  function fillCategories(selectElement) {
+    selectElement.innerHTML =
       '<option value="">Выберите категорию</option>';
 
     refs.categories.forEach(category => {
       const option = document.createElement('option');
+
       option.value = category;
       option.textContent = category;
 
-      categorySelect.appendChild(option);
+      selectElement.appendChild(option);
     });
   }
 
 
-  function fillSubcategories(category) {
-    subcategorySelect.innerHTML =
+  function fillSubcategoriesFor(selectElement, category) {
+    selectElement.innerHTML =
       '<option value="">Без подкатегории</option>';
 
     const list = refs.subcategories[category] || [];
@@ -459,7 +813,7 @@
       option.value = subcategory;
       option.textContent = subcategory;
 
-      subcategorySelect.appendChild(option);
+      selectElement.appendChild(option);
     });
   }
 
@@ -478,7 +832,11 @@
   categorySelect.addEventListener('change', () => {
     const category = categorySelect.value;
 
-    fillSubcategories(category);
+    fillSubcategoriesFor(
+      subcategorySelect,
+      category
+    );
+
     applyDefaultExpenseType(category);
 
     newSubcategoryBox.style.display = 'none';
@@ -488,16 +846,38 @@
   });
 
 
+  editCategory.addEventListener('change', () => {
+    const category = editCategory.value;
+
+    fillSubcategoriesFor(
+      editSubcategory,
+      category
+    );
+
+    const defaultType =
+      refs.defaultTypes[category];
+
+    document
+      .querySelectorAll('input[name="editExpenseType"]')
+      .forEach(input => {
+        input.checked = input.value === defaultType;
+      });
+  });
+
+
   function calculateAmount(value) {
     if (!value.trim()) {
       return null;
     }
 
-    let normalized = value
+    const normalized = value
       .replace(/\s/g, '')
       .replace(/,/g, '.');
 
-    if (!/^\d+(?:\.\d+)?(?:\+\d+(?:\.\d+)?)*$/.test(normalized)) {
+    if (
+      !/^\d+(?:\.\d+)?(?:\+\d+(?:\.\d+)?)*$/
+        .test(normalized)
+    ) {
       return null;
     }
 
@@ -522,224 +902,831 @@
   }
 
 
-  amountInput.addEventListener('input', () => {
-    const total = calculateAmount(amountInput.value);
+  function formatDateHuman(dateString) {
+    const [year, month, day] =
+      dateString.split('-').map(Number);
 
-    if (total === null) {
-      amountTotal.textContent = '';
-      return;
-    }
+    const date = new Date(
+      year,
+      month - 1,
+      day
+    );
+
+    return new Intl.DateTimeFormat(
+      'ru-RU',
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }
+    ).format(date);
+  }
+
+
+  amountInput.addEventListener('input', () => {
+    const total =
+      calculateAmount(amountInput.value);
 
     amountTotal.textContent =
-      'Итого: ' + formatMoney(total);
+      total === null
+        ? ''
+        : 'Итого: ' + formatMoney(total);
   });
 
 
-  showNewSubcategoryButton.addEventListener('click', () => {
-    const category = categorySelect.value;
+  editAmount.addEventListener('input', () => {
+    const total =
+      calculateAmount(editAmount.value);
 
-    if (!category) {
-      showStatus(
-        'Сначала выберите категорию.',
-        'error'
-      );
-
-      return;
-    }
-
-    newSubcategoryBox.style.display =
-      newSubcategoryBox.style.display === 'block'
-        ? 'none'
-        : 'block';
-
-    if (newSubcategoryBox.style.display === 'block') {
-      newSubcategoryInput.focus();
-    }
+    editAmountTotal.textContent =
+      total === null
+        ? ''
+        : 'Итого: ' + formatMoney(total);
   });
 
 
-  saveNewSubcategoryButton.addEventListener('click', async () => {
-    clearStatus();
+  showNewSubcategoryButton.addEventListener(
+    'click',
+    () => {
+      const category = categorySelect.value;
 
-    const category = categorySelect.value;
-    const subcategory = newSubcategoryInput.value.trim();
+      if (!category) {
+        showStatus(
+          'Сначала выберите категорию.',
+          'error'
+        );
 
-    if (!category) {
-      showStatus(
-        'Сначала выберите категорию.',
-        'error'
-      );
-      return;
+        return;
+      }
+
+      newSubcategoryBox.style.display =
+        newSubcategoryBox.style.display === 'block'
+          ? 'none'
+          : 'block';
+
+      if (
+        newSubcategoryBox.style.display === 'block'
+      ) {
+        newSubcategoryInput.focus();
+      }
     }
+  );
 
-    if (!subcategory) {
-      showStatus(
-        'Введите название подкатегории.',
-        'error'
-      );
-      return;
+
+  saveNewSubcategoryButton.addEventListener(
+    'click',
+    async () => {
+      clearStatus();
+
+      const category =
+        categorySelect.value;
+
+      const subcategory =
+        newSubcategoryInput.value.trim();
+
+      if (!category) {
+        showStatus(
+          'Сначала выберите категорию.',
+          'error'
+        );
+        return;
+      }
+
+      if (!subcategory) {
+        showStatus(
+          'Введите название подкатегории.',
+          'error'
+        );
+        return;
+      }
+
+      saveNewSubcategoryButton.disabled = true;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'addSubcategory',
+            category,
+            subcategory
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          throw new Error(
+            data.error ||
+            'Не удалось сохранить подкатегорию'
+          );
+        }
+
+        if (!refs.subcategories[category]) {
+          refs.subcategories[category] = [];
+        }
+
+        if (
+          !refs.subcategories[category]
+            .includes(subcategory)
+        ) {
+          refs.subcategories[category]
+            .push(subcategory);
+
+          refs.subcategories[category]
+            .sort(
+              (a, b) =>
+                a.localeCompare(b, 'ru')
+            );
+        }
+
+        fillSubcategoriesFor(
+          subcategorySelect,
+          category
+        );
+
+        subcategorySelect.value =
+          subcategory;
+
+        newSubcategoryInput.value = '';
+        newSubcategoryBox.style.display =
+          'none';
+
+        showStatus(
+          data.alreadyExists
+            ? 'Такая подкатегория уже была в справочнике.'
+            : 'Подкатегория добавлена.',
+          'success'
+        );
+
+      } catch (error) {
+        showStatus(
+          error.message,
+          'error'
+        );
+
+      } finally {
+        saveNewSubcategoryButton.disabled =
+          false;
+      }
     }
+  );
 
-    saveNewSubcategoryButton.disabled = true;
+
+  form.addEventListener(
+    'submit',
+    async event => {
+      event.preventDefault();
+
+      clearStatus();
+
+      const category =
+        categorySelect.value;
+
+      const subcategory =
+        subcategorySelect.value;
+
+      const selectedType =
+        document.querySelector(
+          'input[name="expenseType"]:checked'
+        );
+
+      const amount =
+        calculateAmount(amountInput.value);
+
+      if (!dateInput.value) {
+        showStatus(
+          'Выберите дату.',
+          'error'
+        );
+        return;
+      }
+
+      if (!category) {
+        showStatus(
+          'Выберите категорию.',
+          'error'
+        );
+        return;
+      }
+
+      if (
+        amount === null ||
+        amount <= 0
+      ) {
+        showStatus(
+          'Введите корректную сумму.',
+          'error'
+        );
+        return;
+      }
+
+      if (!selectedType) {
+        showStatus(
+          'Выберите тип расхода.',
+          'error'
+        );
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent =
+        'Добавляю…';
+
+      try {
+        const response =
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({
+              action: 'addExpense',
+              date: dateInput.value,
+              amount,
+              category,
+              subcategory,
+              expenseType:
+                selectedType.value,
+              comment:
+                document
+                  .getElementById('comment')
+                  .value
+                  .trim()
+            })
+          });
+
+        const data =
+          await response.json();
+
+        if (!data.ok) {
+          throw new Error(
+            data.error ||
+            'Не удалось добавить расход'
+          );
+        }
+
+        showStatus(
+          '✓ Добавлено: ' +
+          formatMoney(amount) +
+          ' · ' +
+          category +
+          (
+            subcategory
+              ? ' · ' + subcategory
+              : ''
+          ),
+          'success'
+        );
+
+        amountInput.value = '';
+        amountTotal.textContent = '';
+
+        document
+          .getElementById('comment')
+          .value = '';
+
+        if (tg?.HapticFeedback) {
+          tg.HapticFeedback
+            .notificationOccurred(
+              'success'
+            );
+        }
+
+      } catch (error) {
+        showStatus(
+          error.message,
+          'error'
+        );
+
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent =
+          'Добавить расход';
+      }
+    }
+  );
+
+
+  async function loadExpenses() {
+    expensesLoading.style.display =
+      'block';
+
+    expensesList.innerHTML = '';
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
-        body: JSON.stringify({
-          action: 'addSubcategory',
-          category,
-          subcategory
-        })
-      });
+      const response = await fetch(
+        `${API_URL}?action=expenses&limit=100&t=${Date.now()}`,
+        {
+          method: 'GET',
+          cache: 'no-store'
+        }
+      );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!data.ok) {
         throw new Error(
-          data.error || 'Не удалось сохранить подкатегорию'
+          data.error ||
+          'Не удалось загрузить расходы'
         );
       }
 
-      if (!refs.subcategories[category]) {
-        refs.subcategories[category] = [];
-      }
+      expenses =
+        data.expenses || [];
 
-      if (!refs.subcategories[category].includes(subcategory)) {
-        refs.subcategories[category].push(subcategory);
-
-        refs.subcategories[category].sort(
-          (a, b) => a.localeCompare(b, 'ru')
-        );
-      }
-
-      fillSubcategories(category);
-
-      subcategorySelect.value = subcategory;
-
-      newSubcategoryInput.value = '';
-      newSubcategoryBox.style.display = 'none';
-
-      showStatus(
-        data.alreadyExists
-          ? 'Такая подкатегория уже была в справочнике.'
-          : 'Подкатегория добавлена.',
-        'success'
-      );
+      renderExpenses();
 
     } catch (error) {
-      showStatus(error.message, 'error');
+      expensesList.innerHTML =
+        `<div class="status error" style="display:block;">
+          ${escapeHtml(error.message)}
+        </div>`;
 
     } finally {
-      saveNewSubcategoryButton.disabled = false;
+      expensesLoading.style.display =
+        'none';
     }
-  });
+  }
 
 
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-
-    clearStatus();
-
-    const category = categorySelect.value;
-    const subcategory = subcategorySelect.value;
-
-    const selectedType =
-      document.querySelector(
-        'input[name="expenseType"]:checked'
-      );
-
-    const amount = calculateAmount(amountInput.value);
-
-    if (!dateInput.value) {
-      showStatus('Выберите дату.', 'error');
+  function renderExpenses() {
+    if (!expenses.length) {
+      expensesList.innerHTML =
+        '<div class="muted">Расходов пока нет.</div>';
       return;
     }
 
-    if (!category) {
-      showStatus('Выберите категорию.', 'error');
-      return;
-    }
+    const grouped = {};
 
-    if (amount === null || amount <= 0) {
-      showStatus(
-        'Введите корректную сумму.',
-        'error'
-      );
-      return;
-    }
+    expenses.forEach(expense => {
+      if (!grouped[expense.date]) {
+        grouped[expense.date] = [];
+      }
 
-    if (!selectedType) {
-      showStatus(
-        'Выберите тип расхода.',
-        'error'
-      );
-      return;
-    }
+      grouped[expense.date]
+        .push(expense);
+    });
 
-    submitButton.disabled = true;
-    submitButton.textContent = 'Добавляю…';
+    expensesList.innerHTML = '';
 
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
-        body: JSON.stringify({
-          action: 'addExpense',
-          date: dateInput.value,
-          amount,
-          category,
-          subcategory,
-          expenseType: selectedType.value,
-          comment:
-            document.getElementById('comment').value.trim()
-        })
+    Object.keys(grouped)
+      .sort((a, b) =>
+        b.localeCompare(a)
+      )
+      .forEach(date => {
+
+        const dayExpenses =
+          grouped[date];
+
+        const total =
+          dayExpenses.reduce(
+            (sum, item) =>
+              sum + Number(item.amount || 0),
+            0
+          );
+
+        const block =
+          document.createElement('div');
+
+        block.className =
+          'day-block';
+
+        block.innerHTML = `
+          <div class="day-header">
+            <div class="day-title">
+              ${escapeHtml(
+                formatDateHuman(date)
+              )}
+            </div>
+            <div class="day-total">
+              ${escapeHtml(
+                formatMoney(total)
+              )}
+            </div>
+          </div>
+        `;
+
+        dayExpenses.forEach(expense => {
+          const item =
+            document.createElement('div');
+
+          item.className =
+            'expense-item';
+
+          item.innerHTML = `
+            <div class="expense-top">
+              <div>
+                <div class="expense-category">
+                  ${escapeHtml(expense.category)}
+                </div>
+
+                ${
+                  expense.subcategory
+                    ? `
+                      <div class="expense-subcategory">
+                        ${escapeHtml(expense.subcategory)}
+                      </div>
+                    `
+                    : ''
+                }
+              </div>
+
+              <div class="expense-amount">
+                ${escapeHtml(
+                  formatMoney(expense.amount)
+                )}
+              </div>
+            </div>
+
+            <div class="expense-type">
+              ${escapeHtml(
+                expense.expenseType
+              )}
+            </div>
+
+            ${
+              expense.comment
+                ? `
+                  <div class="expense-comment">
+                    ${escapeHtml(expense.comment)}
+                  </div>
+                `
+                : ''
+            }
+
+            <div class="expense-actions">
+              <button
+                type="button"
+                class="icon-button"
+                data-edit-row="${expense.row}"
+              >
+                ✏️ Изменить
+              </button>
+
+              <button
+                type="button"
+                class="icon-button delete-icon"
+                data-delete-row="${expense.row}"
+              >
+                🗑 Удалить
+              </button>
+            </div>
+          `;
+
+          block.appendChild(item);
+        });
+
+        expensesList.appendChild(block);
       });
 
-      const data = await response.json();
+
+    document
+      .querySelectorAll(
+        '[data-edit-row]'
+      )
+      .forEach(button => {
+        button.addEventListener(
+          'click',
+          () => {
+            openEditModal(
+              Number(
+                button.dataset.editRow
+              )
+            );
+          }
+        );
+      });
+
+
+    document
+      .querySelectorAll(
+        '[data-delete-row]'
+      )
+      .forEach(button => {
+        button.addEventListener(
+          'click',
+          () => {
+            deleteExpense(
+              Number(
+                button.dataset.deleteRow
+              )
+            );
+          }
+        );
+      });
+  }
+
+
+  function openEditModal(row) {
+    const expense =
+      expenses.find(
+        item => item.row === row
+      );
+
+    if (!expense) {
+      return;
+    }
+
+    clearEditStatus();
+
+    editRow.value =
+      expense.row;
+
+    editDate.value =
+      expense.date;
+
+    editCategory.value =
+      expense.category;
+
+    fillSubcategoriesFor(
+      editSubcategory,
+      expense.category
+    );
+
+    editSubcategory.value =
+      expense.subcategory;
+
+    editAmount.value =
+      String(expense.amount);
+
+    editAmountTotal.textContent =
+      'Итого: ' +
+      formatMoney(expense.amount);
+
+    editComment.value =
+      expense.comment || '';
+
+    document
+      .querySelectorAll(
+        'input[name="editExpenseType"]'
+      )
+      .forEach(input => {
+        input.checked =
+          input.value ===
+          expense.expenseType;
+      });
+
+    editModalBackdrop
+      .classList
+      .add('open');
+  }
+
+
+  function closeEditModal() {
+    editModalBackdrop
+      .classList
+      .remove('open');
+  }
+
+
+  cancelEdit.addEventListener(
+    'click',
+    closeEditModal
+  );
+
+
+  editForm.addEventListener(
+    'submit',
+    async event => {
+      event.preventDefault();
+
+      clearEditStatus();
+
+      const selectedType =
+        document.querySelector(
+          'input[name="editExpenseType"]:checked'
+        );
+
+      const amount =
+        calculateAmount(
+          editAmount.value
+        );
+
+      if (!editDate.value) {
+        showEditStatus(
+          'Выберите дату.',
+          'error'
+        );
+        return;
+      }
+
+      if (!editCategory.value) {
+        showEditStatus(
+          'Выберите категорию.',
+          'error'
+        );
+        return;
+      }
+
+      if (
+        amount === null ||
+        amount <= 0
+      ) {
+        showEditStatus(
+          'Введите корректную сумму.',
+          'error'
+        );
+        return;
+      }
+
+      if (!selectedType) {
+        showEditStatus(
+          'Выберите тип расхода.',
+          'error'
+        );
+        return;
+      }
+
+      const saveButton =
+        document.getElementById(
+          'saveEdit'
+        );
+
+      saveButton.disabled = true;
+      saveButton.textContent =
+        'Сохраняю…';
+
+      try {
+        const response =
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({
+              action: 'editExpense',
+              row: Number(
+                editRow.value
+              ),
+              date: editDate.value,
+              amount,
+              category:
+                editCategory.value,
+              subcategory:
+                editSubcategory.value,
+              expenseType:
+                selectedType.value,
+              comment:
+                editComment.value.trim()
+            })
+          });
+
+        const data =
+          await response.json();
+
+        if (!data.ok) {
+          throw new Error(
+            data.error ||
+            'Не удалось сохранить расход'
+          );
+        }
+
+        closeEditModal();
+
+        await loadExpenses();
+
+        if (tg?.HapticFeedback) {
+          tg.HapticFeedback
+            .notificationOccurred(
+              'success'
+            );
+        }
+
+      } catch (error) {
+        showEditStatus(
+          error.message,
+          'error'
+        );
+
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent =
+          'Сохранить';
+      }
+    }
+  );
+
+
+  async function deleteExpense(row) {
+    const expense =
+      expenses.find(
+        item => item.row === row
+      );
+
+    if (!expense) {
+      return;
+    }
+
+    const ok =
+      confirm(
+        `Удалить расход ${formatMoney(expense.amount)} — ${expense.category}?`
+      );
+
+    if (!ok) {
+      return;
+    }
+
+    try {
+      const response =
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'deleteExpense',
+            row
+          })
+        });
+
+      const data =
+        await response.json();
 
       if (!data.ok) {
         throw new Error(
-          data.error || 'Не удалось добавить расход'
+          data.error ||
+          'Не удалось удалить расход'
         );
       }
 
-      showStatus(
-        '✓ Добавлено: ' +
-        formatMoney(amount) +
-        ' · ' +
-        category +
-        (subcategory ? ' · ' + subcategory : ''),
-        'success'
-      );
-
-      amountInput.value = '';
-      amountTotal.textContent = '';
-
-      document.getElementById('comment').value = '';
+      await loadExpenses();
 
       if (tg?.HapticFeedback) {
-        tg.HapticFeedback.notificationOccurred('success');
+        tg.HapticFeedback
+          .notificationOccurred(
+            'success'
+          );
       }
-
-      amountInput.focus();
 
     } catch (error) {
-      showStatus(error.message, 'error');
-
-      if (tg?.HapticFeedback) {
-        tg.HapticFeedback.notificationOccurred('error');
-      }
-
-    } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = 'Добавить расход';
+      alert(error.message);
     }
-  });
+  }
+
+
+  function showScreen(name) {
+    addScreen.classList
+      .toggle(
+        'active',
+        name === 'add'
+      );
+
+    expensesScreen.classList
+      .toggle(
+        'active',
+        name === 'expenses'
+      );
+
+    navAdd.classList
+      .toggle(
+        'active',
+        name === 'add'
+      );
+
+    navExpenses.classList
+      .toggle(
+        'active',
+        name === 'expenses'
+      );
+
+    if (name === 'expenses') {
+      loadExpenses();
+    }
+  }
+
+
+  navAdd.addEventListener(
+    'click',
+    () => {
+      showScreen('add');
+    }
+  );
+
+
+  navExpenses.addEventListener(
+    'click',
+    () => {
+      showScreen('expenses');
+    }
+  );
+
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
 
   setToday();
