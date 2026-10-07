@@ -902,7 +902,7 @@
   }
 
 
- function formatDateHuman(dateString) {
+/* function formatDateHuman(dateString) {
   if (!dateString) {
     return 'Дата не указана';
   }
@@ -961,6 +961,69 @@
       year: 'numeric'
     }
   ).format(date);
+}*/
+
+  function formatDateHuman(dateString) {
+  try {
+    console.log(
+      'formatDateHuman input:',
+      dateString,
+      typeof dateString
+    );
+
+    if (
+      dateString === null ||
+      dateString === undefined ||
+      dateString === ''
+    ) {
+      return 'Без даты';
+    }
+
+    const text = String(dateString).trim();
+
+    // YYYY-MM-DD
+    let match = text.match(
+      /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+
+    if (match) {
+      return `${match[3]}.${match[2]}.${match[1]}`;
+    }
+
+    // DD.MM.YYYY
+    match = text.match(
+      /^(\d{2})\.(\d{2})\.(\d{4})$/
+    );
+
+    if (match) {
+      return text;
+    }
+
+    // ISO дата типа 2026-10-07T00:00:00.000Z
+    match = text.match(
+      /^(\d{4})-(\d{2})-(\d{2})T/
+    );
+
+    if (match) {
+      return `${match[3]}.${match[2]}.${match[1]}`;
+    }
+
+    console.warn(
+      'Неизвестный формат даты:',
+      text
+    );
+
+    return text;
+
+  } catch (error) {
+    console.error(
+      'formatDateHuman error:',
+      error,
+      dateString
+    );
+
+    return String(dateString ?? '');
+  }
 }
 
 
