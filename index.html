@@ -99,6 +99,36 @@
       min-height: 86px;
     }
 
+    .amount-input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 58px;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .amount-input-row input {
+      min-width: 0;
+    }
+
+    .plus-button {
+      width: 58px;
+      min-height: 46px;
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 0;
+      background: rgba(47,128,237,0.08);
+      color: var(--accent);
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .plus-button:active {
+      background: rgba(47,128,237,0.16);
+    }
+
     .amount-total {
       margin-top: 7px;
       min-height: 22px;
@@ -670,19 +700,31 @@
         <div class="field">
           <label for="amount">Сумма</label>
 
-          <input
-            id="amount"
-            type="text"
-            inputmode="decimal"
-            placeholder="Например: 85 + 85 + 55 + 65"
-            autocomplete="off"
-            required
-          />
+          <div class="amount-input-row">
+            <input
+              id="amount"
+              type="text"
+              inputmode="decimal"
+              placeholder="Например: 85 + 85 + 55"
+              autocomplete="off"
+              required
+            />
+
+            <button
+              id="addPlusButton"
+              type="button"
+              class="plus-button"
+              aria-label="Добавить плюс"
+              title="Добавить следующую сумму"
+            >
+              +
+            </button>
+          </div>
 
           <div id="amountTotal" class="amount-total"></div>
 
           <div class="muted">
-            Можно вводить несколько сумм через +
+            Введите сумму и нажмите +, чтобы добавить следующую
           </div>
         </div>
 
@@ -1060,6 +1102,7 @@
 
   const amountInput = document.getElementById('amount');
   const amountTotal = document.getElementById('amountTotal');
+  const addPlusButton = document.getElementById('addPlusButton');
 
   const showNewSubcategoryButton =
     document.getElementById('showNewSubcategory');
@@ -1512,6 +1555,74 @@ let selectedStatsMonth = getCurrentMonthValue();
         ? ''
         : 'Итого: ' + formatMoney(total);
   });
+
+
+  addPlusButton.addEventListener(
+    'click',
+    () => {
+      const value = amountInput.value;
+
+      if (!value.trim()) {
+        amountInput.focus();
+        return;
+      }
+
+      if (/\+\s*$/.test(value)) {
+        amountInput.focus();
+        return;
+      }
+
+      const start =
+        amountInput.selectionStart ??
+        value.length;
+
+      const end =
+        amountInput.selectionEnd ??
+        start;
+
+      const before =
+        value.slice(0, start);
+
+      const after =
+        value.slice(end);
+
+      const cleanBefore =
+        before.replace(/\s*$/, '');
+
+      const cleanAfter =
+        after.replace(/^\s*/, '');
+
+      amountInput.value =
+        cleanBefore +
+        ' + ' +
+        cleanAfter;
+
+      const newCursorPosition =
+        cleanBefore.length + 3;
+
+      amountInput.focus();
+
+      try {
+        amountInput.setSelectionRange(
+          newCursorPosition,
+          newCursorPosition
+        );
+      } catch (error) {
+        // Некоторые WebView не поддерживают управление выделением.
+      }
+
+      amountInput.dispatchEvent(
+        new Event(
+          'input',
+          { bubbles: true }
+        )
+      );
+
+      if (tg?.HapticFeedback) {
+        tg.HapticFeedback.selectionChanged();
+      }
+    }
+  );
 
 
   editAmount.addEventListener('input', () => {
