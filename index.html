@@ -148,31 +148,38 @@
       font-weight: 700;
     }
 
-   .custom-date-field {
-  position: relative;
-}
+    .date-picker-field {
+      position: relative;
+    }
 
-.date-button {
-  width: 100%;
-  min-height: 46px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 11px 12px;
-  background: #fff;
-  color: var(--text);
-  font: inherit;
-  font-size: 16px;
-  text-align: left;
-  cursor: pointer;
-}
+    .native-date-input {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 46px;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      caret-color: transparent;
+      background: #fff;
+      cursor: pointer;
+    }
 
-.hidden-date-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
+    .native-date-input::-webkit-calendar-picker-indicator {
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    .date-display-overlay {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      padding: 11px 44px 11px 12px;
+      pointer-events: none;
+      color: var(--text);
+      font-size: 16px;
+    }
 
     button {
       font: inherit;
@@ -595,45 +602,35 @@
     </div>
 
     <div id="customPeriod" class="custom-period">
- <div>
-  <label for="filterFrom">С</label>
+      <div>
+        <label for="filterFrom">С</label>
 
-  <div class="custom-date-field">
-    <button
-      id="filterFromButton"
-      type="button"
-      class="date-button"
-    >
-      ДД/ММ/ГГГГ
-    </button>
+        <div class="date-picker-field">
+          <input
+            id="filterFrom"
+            class="native-date-input"
+            type="date"
+          >
+          <div id="filterFromDisplay" class="date-display-overlay">
+            ДД/ММ/ГГГГ
+          </div>
+        </div>
+      </div>
 
-    <input
-      id="filterFrom"
-      class="hidden-date-input"
-      type="date"
-    >
-  </div>
-</div>
+      <div>
+        <label for="filterTo">По</label>
 
-<div>
-  <label for="filterTo">По</label>
-
-  <div class="custom-date-field">
-    <button
-      id="filterToButton"
-      type="button"
-      class="date-button"
-    >
-      ДД/ММ/ГГГГ
-    </button>
-
-    <input
-      id="filterTo"
-      class="hidden-date-input"
-      type="date"
-    >
-  </div>
-</div>
+        <div class="date-picker-field">
+          <input
+            id="filterTo"
+            class="native-date-input"
+            type="date"
+          >
+          <div id="filterToDisplay" class="date-display-overlay">
+            ДД/ММ/ГГГГ
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="field">
@@ -931,11 +928,11 @@ let selectedPeriod = 'month';
   const cancelEdit =
     document.getElementById('cancelEdit');
 
-  const filterFromButton =
-    document.getElementById('filterFromButton');
+  const filterFromDisplay =
+    document.getElementById('filterFromDisplay');
 
-  const filterToButton =
-    document.getElementById('filterToButton');
+  const filterToDisplay =
+    document.getElementById('filterToDisplay');
 
 
   function setToday() {
@@ -2248,8 +2245,8 @@ function getPeriodRange(period) {
   applyFilters.addEventListener(
     'click',
     () => {
-      syncDateButton(filterFrom, filterFromButton);
-      syncDateButton(filterTo, filterToButton);
+      syncDateDisplay(filterFrom, filterFromDisplay);
+      syncDateDisplay(filterTo, filterToDisplay);
       loadExpenses();
     }
   );
@@ -2267,11 +2264,11 @@ resetFilters.addEventListener(
     filterFrom.value = '';
     filterTo.value = '';
 
-    filterFromButton.textContent =
-  'ДД/ММ/ГГГГ';
+    filterFromDisplay.textContent =
+      'ДД/ММ/ГГГГ';
 
-filterToButton.textContent =
-  'ДД/ММ/ГГГГ';
+    filterToDisplay.textContent =
+      'ДД/ММ/ГГГГ';
 
     
     customPeriod.classList
@@ -2325,96 +2322,55 @@ filterSearch.addEventListener(
   }
 
 
-  function syncDateButton(input, button) {
-    button.textContent = input.value
+  function syncDateDisplay(input, display) {
+    display.textContent = input.value
       ? apiDateToDisplay(input.value)
       : 'ДД/ММ/ГГГГ';
   }
 
 
-  function watchDatePicker(input, button) {
-    let attempts = 0;
-    let lastValue = input.value;
-
-    // Сразу синхронизируем подпись, если дата уже была выбрана.
-    syncDateButton(input, button);
+  function startDateValueWatcher(input, display) {
+    const startedAt = Date.now();
 
     const watcher = setInterval(() => {
-      attempts += 1;
+      syncDateDisplay(input, display);
 
-      if (input.value !== lastValue) {
-        lastValue = input.value;
-        syncDateButton(input, button);
-      }
-
-      // Дополнительная страховка для Telegram WebView:
-      // даже если событие change/input не пришло, значение проверяется напрямую.
-      if (input.value) {
-        syncDateButton(input, button);
-      }
-
-      // Останавливаем наблюдение примерно через 30 секунд.
-      if (attempts >= 300) {
+      if (Date.now() - startedAt > 30000) {
         clearInterval(watcher);
       }
-    }, 100);
+    }, 150);
   }
 
 
-  function openDatePicker(input, button) {
-    watchDatePicker(input, button);
-
-    if (typeof input.showPicker === 'function') {
-      input.showPicker();
-    } else {
-      input.click();
-    }
-  }
-
-
-  filterFromButton.addEventListener(
-    'click',
-    () => {
-      openDatePicker(filterFrom, filterFromButton);
-    }
-  );
-
-
-  filterToButton.addEventListener(
-    'click',
-    () => {
-      openDatePicker(filterTo, filterToButton);
-    }
-  );
-
-
   filterFrom.addEventListener(
-    'change',
+    'focus',
     () => {
-      syncDateButton(filterFrom, filterFromButton);
-    }
-  );
-
-  filterFrom.addEventListener(
-    'input',
-    () => {
-      syncDateButton(filterFrom, filterFromButton);
+      startDateValueWatcher(filterFrom, filterFromDisplay);
     }
   );
 
   filterTo.addEventListener(
-    'change',
+    'focus',
     () => {
-      syncDateButton(filterTo, filterToButton);
+      startDateValueWatcher(filterTo, filterToDisplay);
     }
   );
 
-  filterTo.addEventListener(
-    'input',
-    () => {
-      syncDateButton(filterTo, filterToButton);
-    }
-  );
+  ['input', 'change', 'blur'].forEach(eventName => {
+    filterFrom.addEventListener(
+      eventName,
+      () => {
+        syncDateDisplay(filterFrom, filterFromDisplay);
+      }
+    );
+
+    filterTo.addEventListener(
+      eventName,
+      () => {
+        syncDateDisplay(filterTo, filterToDisplay);
+      }
+    );
+  });
 
 
   // Инициализация приложения — после регистрации всех обработчиков.
