@@ -931,16 +931,11 @@ let selectedPeriod = 'month';
   const cancelEdit =
     document.getElementById('cancelEdit');
 
-  const filterFromDisplay =
-  document.getElementById('filterFromDisplay');
-
-const filterToDisplay =
-  document.getElementById('filterToDisplay');
   const filterFromButton =
-  document.getElementById('filterFromButton');
+    document.getElementById('filterFromButton');
 
-const filterToButton =
-  document.getElementById('filterToButton');
+  const filterToButton =
+    document.getElementById('filterToButton');
 
 
   function setToday() {
@@ -1129,66 +1124,7 @@ const filterToButton =
   }
 
 
-/* function formatDateHuman(dateString) {
-  if (!dateString) {
-    return 'Дата не указана';
-  }
 
-  const text = String(dateString).trim();
-
-  let year;
-  let month;
-  let day;
-
-  // YYYY-MM-DD
-  let match = text.match(
-    /^(\d{4})-(\d{2})-(\d{2})$/
-  );
-
-  if (match) {
-    year = Number(match[1]);
-    month = Number(match[2]);
-    day = Number(match[3]);
-  }
-
-  // DD.MM.YYYY
-  if (!match) {
-    match = text.match(
-      /^(\d{2})\.(\d{2})\.(\d{4})$/
-    );
-
-    if (match) {
-      day = Number(match[1]);
-      month = Number(match[2]);
-      year = Number(match[3]);
-    }
-  }
-
-  if (!year || !month || !day) {
-    console.warn('Некорректная дата:', dateString);
-    return text;
-  }
-
-  const date = new Date(
-    year,
-    month - 1,
-    day
-  );
-
-  if (Number.isNaN(date.getTime())) {
-    console.warn('Invalid Date:', dateString);
-    return text;
-  }
-
-  return new Intl.DateTimeFormat(
-    'ru-RU',
-    {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }
-  ).format(date);
-}*/
 
  function formatDateHuman(dateString) {
   if (
@@ -2310,11 +2246,13 @@ function getPeriodRange(period) {
   });
 
   applyFilters.addEventListener(
-  'click',
-  () => {
-    loadExpenses();
-  }
-);
+    'click',
+    () => {
+      syncDateButton(filterFrom, filterFromButton);
+      syncDateButton(filterTo, filterToButton);
+      loadExpenses();
+    }
+  );
 
 
 resetFilters.addEventListener(
@@ -2374,223 +2312,115 @@ filterSearch.addEventListener(
   }
 );
 
+  function apiDateToDisplay(value) {
+    const match = String(value || '').match(
+      /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+
+    if (!match) {
+      return '';
+    }
+
+    return `${match[3]}/${match[2]}/${match[1]}`;
+  }
+
+
+  function syncDateButton(input, button) {
+    button.textContent = input.value
+      ? apiDateToDisplay(input.value)
+      : 'ДД/ММ/ГГГГ';
+  }
+
+
+  function watchDatePicker(input, button) {
+    let attempts = 0;
+    let lastValue = input.value;
+
+    // Сразу синхронизируем подпись, если дата уже была выбрана.
+    syncDateButton(input, button);
+
+    const watcher = setInterval(() => {
+      attempts += 1;
+
+      if (input.value !== lastValue) {
+        lastValue = input.value;
+        syncDateButton(input, button);
+      }
+
+      // Дополнительная страховка для Telegram WebView:
+      // даже если событие change/input не пришло, значение проверяется напрямую.
+      if (input.value) {
+        syncDateButton(input, button);
+      }
+
+      // Останавливаем наблюдение примерно через 30 секунд.
+      if (attempts >= 300) {
+        clearInterval(watcher);
+      }
+    }, 100);
+  }
+
+
+  function openDatePicker(input, button) {
+    watchDatePicker(input, button);
+
+    if (typeof input.showPicker === 'function') {
+      input.showPicker();
+    } else {
+      input.click();
+    }
+  }
+
+
+  filterFromButton.addEventListener(
+    'click',
+    () => {
+      openDatePicker(filterFrom, filterFromButton);
+    }
+  );
+
+
+  filterToButton.addEventListener(
+    'click',
+    () => {
+      openDatePicker(filterTo, filterToButton);
+    }
+  );
+
+
+  filterFrom.addEventListener(
+    'change',
+    () => {
+      syncDateButton(filterFrom, filterFromButton);
+    }
+  );
+
+  filterFrom.addEventListener(
+    'input',
+    () => {
+      syncDateButton(filterFrom, filterFromButton);
+    }
+  );
+
+  filterTo.addEventListener(
+    'change',
+    () => {
+      syncDateButton(filterTo, filterToButton);
+    }
+  );
+
+  filterTo.addEventListener(
+    'input',
+    () => {
+      syncDateButton(filterTo, filterToButton);
+    }
+  );
+
+
+  // Инициализация приложения — после регистрации всех обработчиков.
   setToday();
   loadReferences();
 
-  function displayDateToApi(value) {
-  const text = String(value || '').trim();
-
-  const match = text.match(
-    /^(\d{2})\/(\d{2})\/(\d{4})$/
-  );
-
-  if (!match) {
-    return '';
-  }
-
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  const year = Number(match[3]);
-
-  const date = new Date(
-    year,
-    month - 1,
-    day
-  );
-
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
-    return '';
-  }
-
-  return (
-    String(year) + '-' +
-    String(month).padStart(2, '0') + '-' +
-    String(day).padStart(2, '0')
-  );
-}
-
-
-function apiDateToDisplay(value) {
-  const match = String(value || '').match(
-    /^(\d{4})-(\d{2})-(\d{2})$/
-  );
-
-  if (!match) {
-    return '';
-  }
-
-  return `${match[3]}/${match[2]}/${match[1]}`;
-}
-
-  function formatDateInput(input) {
-  input.addEventListener('input', () => {
-    let digits = input.value
-      .replace(/\D/g, '')
-      .slice(0, 8);
-
-    let result = '';
-
-    if (digits.length > 0) {
-      result = digits.slice(0, 2);
-    }
-
-    if (digits.length > 2) {
-      result += '/' + digits.slice(2, 4);
-    }
-
-    if (digits.length > 4) {
-      result += '/' + digits.slice(4, 8);
-    }
-
-    input.value = result;
-  });
-}
-
-  function apiDateToDisplay(value) {
-  if (!value) {
-    return '';
-  }
-
-  const match = value.match(
-    /^(\d{4})-(\d{2})-(\d{2})$/
-  );
-
-  if (!match) {
-    return value;
-  }
-
-  return `${match[3]}/${match[2]}/${match[1]}`;
-}
-
- function syncDateButton(input, button) {
-  button.textContent =
-    input.value
-      ? apiDateToDisplay(input.value)
-      : 'ДД/ММ/ГГГГ';
-}
-
-
-filterFrom.addEventListener(
-  'input',
-  () => {
-    syncDateButton(
-      filterFrom,
-      filterFromButton
-    );
-  }
-);
-
-filterFrom.addEventListener(
-  'change',
-  () => {
-    syncDateButton(
-      filterFrom,
-      filterFromButton
-    );
-  }
-);
-
-
-filterTo.addEventListener(
-  'input',
-  () => {
-    syncDateButton(
-      filterTo,
-      filterToButton
-    );
-  }
-);
-
-filterTo.addEventListener(
-  'change',
-  () => {
-    syncDateButton(
-      filterTo,
-      filterToButton
-    );
-  }
-);
-
-function apiDateToDisplay(value) {
-  if (!value) {
-    return '';
-  }
-
-  const match = value.match(
-    /^(\d{4})-(\d{2})-(\d{2})$/
-  );
-
-  if (!match) {
-    return value;
-  }
-
-  return `${match[3]}/${match[2]}/${match[1]}`;
-}
-
- function openDatePicker(input, button) {
-  if (typeof input.showPicker === 'function') {
-    input.showPicker();
-  } else {
-    input.click();
-  }
-
-  setTimeout(() => {
-    syncDateButton(
-      input,
-      button
-    );
-  }, 300);
-}
-
-
-filterFromButton.addEventListener(
-  'click',
-  () => {
-    openDatePicker(
-      filterFrom,
-      filterFromButton
-    );
-  }
-);
-
-
-filterToButton.addEventListener(
-  'click',
-  () => {
-    openDatePicker(
-      filterTo,
-      filterToButton
-    );
-  }
-);
-
-filterFrom.addEventListener(
-  'change',
-  () => {
-    filterFromButton.textContent =
-      filterFrom.value
-        ? apiDateToDisplay(filterFrom.value)
-        : 'ДД/ММ/ГГГГ';
-  }
-);
-
-
-filterTo.addEventListener(
-  'change',
-  () => {
-    filterToButton.textContent =
-      filterTo.value
-        ? apiDateToDisplay(filterTo.value)
-        : 'ДД/ММ/ГГГГ';
-  }
-);
-  
-formatDateInput(filterFrom);
-formatDateInput(filterTo);
 </script>
 
   
