@@ -148,23 +148,30 @@
       font-weight: 700;
     }
 
-    .date-picker-wrap {
+   .custom-date-field {
   position: relative;
 }
 
-.date-display {
+.date-button {
   width: 100%;
-  pointer-events: none;
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 12px;
   background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
 }
 
-.native-date-picker {
+.hidden-date-input {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 1px;
+  height: 1px;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none;
 }
 
     button {
@@ -588,21 +595,21 @@
     </div>
 
     <div id="customPeriod" class="custom-period">
-      <div>
+ <div>
   <label for="filterFrom">С</label>
 
-  <div class="date-picker-wrap">
-    <input
-      id="filterFromDisplay"
-      class="date-display"
-      type="text"
-      placeholder="ДД/ММ/ГГГГ"
-      readonly
+  <div class="custom-date-field">
+    <button
+      id="filterFromButton"
+      type="button"
+      class="date-button"
     >
+      ДД/ММ/ГГГГ
+    </button>
 
     <input
       id="filterFrom"
-      class="native-date-picker"
+      class="hidden-date-input"
       type="date"
     >
   </div>
@@ -611,18 +618,18 @@
 <div>
   <label for="filterTo">По</label>
 
-  <div class="date-picker-wrap">
-    <input
-      id="filterToDisplay"
-      class="date-display"
-      type="text"
-      placeholder="ДД/ММ/ГГГГ"
-      readonly
+  <div class="custom-date-field">
+    <button
+      id="filterToButton"
+      type="button"
+      class="date-button"
     >
+      ДД/ММ/ГГГГ
+    </button>
 
     <input
       id="filterTo"
-      class="native-date-picker"
+      class="hidden-date-input"
       type="date"
     >
   </div>
@@ -929,6 +936,11 @@ let selectedPeriod = 'month';
 
 const filterToDisplay =
   document.getElementById('filterToDisplay');
+  const filterFromButton =
+  document.getElementById('filterFromButton');
+
+const filterToButton =
+  document.getElementById('filterToButton');
 
 
   function setToday() {
@@ -2317,9 +2329,13 @@ resetFilters.addEventListener(
     filterFrom.value = '';
     filterTo.value = '';
 
-    filterFromDisplay.value = '';
-filterToDisplay.value = '';
+    filterFromButton.textContent =
+  'ДД/ММ/ГГГГ';
 
+filterToButton.textContent =
+  'ДД/ММ/ГГГГ';
+
+    
     customPeriod.classList
       .remove('visible');
 
@@ -2466,6 +2482,68 @@ filterTo.addEventListener(
   }
 );
 
+function apiDateToDisplay(value) {
+  if (!value) {
+    return '';
+  }
+
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (!match) {
+    return value;
+  }
+
+  return `${match[3]}/${match[2]}/${match[1]}`;
+}
+
+  function openDatePicker(input) {
+  if (typeof input.showPicker === 'function') {
+    input.showPicker();
+  } else {
+    input.click();
+  }
+}
+
+
+filterFromButton.addEventListener(
+  'click',
+  () => {
+    openDatePicker(filterFrom);
+  }
+);
+
+
+filterToButton.addEventListener(
+  'click',
+  () => {
+    openDatePicker(filterTo);
+  }
+);
+
+
+filterFrom.addEventListener(
+  'change',
+  () => {
+    filterFromButton.textContent =
+      filterFrom.value
+        ? apiDateToDisplay(filterFrom.value)
+        : 'ДД/ММ/ГГГГ';
+  }
+);
+
+
+filterTo.addEventListener(
+  'change',
+  () => {
+    filterToButton.textContent =
+      filterTo.value
+        ? apiDateToDisplay(filterTo.value)
+        : 'ДД/ММ/ГГГГ';
+  }
+);
+  
 formatDateInput(filterFrom);
 formatDateInput(filterTo);
 </script>
