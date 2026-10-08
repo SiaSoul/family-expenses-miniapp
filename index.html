@@ -382,6 +382,167 @@
       background: #fdeceb;
     }
 
+    .stats-month-nav {
+      display: grid;
+      grid-template-columns: 46px 1fr 46px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .stats-month-button {
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .stats-month-title {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .stats-total-card,
+    .stats-mini-card,
+    .stats-categories-card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .stats-total-card {
+      padding: 18px;
+      margin-bottom: 10px;
+    }
+
+    .stats-total-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .stats-total-value {
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .stats-count {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stats-compare {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .stats-compare.up {
+      color: var(--danger);
+    }
+
+    .stats-compare.down {
+      color: var(--success);
+    }
+
+    .stats-compare.same {
+      color: var(--muted);
+    }
+
+    .stats-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .stats-mini-card {
+      padding: 14px;
+    }
+
+    .stats-mini-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .stats-mini-value {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .stats-categories-card {
+      padding: 16px;
+    }
+
+    .stats-categories-title {
+      margin-bottom: 14px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .stats-category-row {
+      margin-bottom: 15px;
+    }
+
+    .stats-category-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stats-category-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+
+    .stats-category-name {
+      font-size: 14px;
+      font-weight: 700;
+      min-width: 0;
+    }
+
+    .stats-category-amount {
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stats-category-meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .stats-bar-track {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e9e9eb;
+    }
+
+    .stats-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .stats-empty {
+      padding: 20px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
     .bottom-nav {
       position: fixed;
       left: 0;
@@ -399,7 +560,7 @@
       width: 100%;
       max-width: 560px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .nav-button {
@@ -681,6 +842,64 @@
 
 </section>
 
+<section id="statsScreen" class="screen">
+
+  <h2>Статистика</h2>
+
+  <div class="stats-month-nav">
+    <button
+      id="statsPrevMonth"
+      class="stats-month-button"
+      type="button"
+      aria-label="Предыдущий месяц"
+    >
+      ‹
+    </button>
+
+    <div id="statsMonthTitle" class="stats-month-title"></div>
+
+    <button
+      id="statsNextMonth"
+      class="stats-month-button"
+      type="button"
+      aria-label="Следующий месяц"
+    >
+      ›
+    </button>
+  </div>
+
+  <div id="statsLoading" class="loading">
+    Загружаю статистику…
+  </div>
+
+  <div id="statsContent" style="display:none;">
+    <div class="stats-total-card">
+      <div class="stats-total-label">Всего расходов</div>
+      <div id="statsTotal" class="stats-total-value">0 ₽</div>
+      <div id="statsCount" class="stats-count"></div>
+      <div id="statsCompare" class="stats-compare same"></div>
+    </div>
+
+    <div class="stats-type-grid">
+      <div class="stats-mini-card">
+        <div class="stats-mini-label">Переменные</div>
+        <div id="statsVariable" class="stats-mini-value">0 ₽</div>
+      </div>
+
+      <div class="stats-mini-card">
+        <div class="stats-mini-label">Повторяющиеся</div>
+        <div id="statsRecurring" class="stats-mini-value">0 ₽</div>
+      </div>
+    </div>
+
+    <div class="stats-categories-card">
+      <div class="stats-categories-title">По категориям</div>
+      <div id="statsCategories"></div>
+    </div>
+  </div>
+
+</section>
+
 </div>
 
 
@@ -701,6 +920,14 @@
       type="button"
     >
       Расходы
+    </button>
+
+    <button
+      id="navStats"
+      class="nav-button"
+      type="button"
+    >
+      📊 Статистика
     </button>
 
   </div>
@@ -858,11 +1085,17 @@
   const expensesScreen =
     document.getElementById('expensesScreen');
 
+  const statsScreen =
+    document.getElementById('statsScreen');
+
   const navAdd =
     document.getElementById('navAdd');
 
   const navExpenses =
     document.getElementById('navExpenses');
+
+  const navStats =
+    document.getElementById('navStats');
 
   const expensesLoading =
     document.getElementById('expensesLoading');
@@ -893,7 +1126,41 @@ const resetFilters =
 const expensesSummary =
   document.getElementById('expensesSummary');
 
+const statsPrevMonth =
+  document.getElementById('statsPrevMonth');
+
+const statsNextMonth =
+  document.getElementById('statsNextMonth');
+
+const statsMonthTitle =
+  document.getElementById('statsMonthTitle');
+
+const statsLoading =
+  document.getElementById('statsLoading');
+
+const statsContent =
+  document.getElementById('statsContent');
+
+const statsTotal =
+  document.getElementById('statsTotal');
+
+const statsCount =
+  document.getElementById('statsCount');
+
+const statsCompare =
+  document.getElementById('statsCompare');
+
+const statsVariable =
+  document.getElementById('statsVariable');
+
+const statsRecurring =
+  document.getElementById('statsRecurring');
+
+const statsCategories =
+  document.getElementById('statsCategories');
+
 let selectedPeriod = 'month';
+let selectedStatsMonth = getCurrentMonthValue();
 
   const editModalBackdrop =
     document.getElementById('editModalBackdrop');
@@ -2066,33 +2333,281 @@ async function loadExpenses() {
   }
 
 
+  function getCurrentMonthValue() {
+    const now = new Date();
+    return (
+      String(now.getFullYear()) + '-' +
+      String(now.getMonth() + 1).padStart(2, '0')
+    );
+  }
+
+
+  function shiftMonthValue(monthValue, delta) {
+    const match = String(monthValue || '').match(
+      /^(\d{4})-(\d{2})$/
+    );
+
+    if (!match) {
+      return getCurrentMonthValue();
+    }
+
+    const date = new Date(
+      Number(match[1]),
+      Number(match[2]) - 1 + delta,
+      1
+    );
+
+    return (
+      String(date.getFullYear()) + '-' +
+      String(date.getMonth() + 1).padStart(2, '0')
+    );
+  }
+
+
+  function formatStatsMonth(monthValue) {
+    const match = String(monthValue || '').match(
+      /^(\d{4})-(\d{2})$/
+    );
+
+    if (!match) {
+      return monthValue;
+    }
+
+    const monthNames = [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь'
+    ];
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+
+    return `${monthNames[month - 1]} ${year}`;
+  }
+
+
+  function renderStats(data) {
+    statsMonthTitle.textContent =
+      formatStatsMonth(data.month || selectedStatsMonth);
+
+    statsTotal.textContent =
+      formatMoney(Number(data.total || 0));
+
+    statsCount.textContent =
+      `Операций: ${Number(data.count || 0)}`;
+
+    statsVariable.textContent =
+      formatMoney(Number(data.variable || 0));
+
+    statsRecurring.textContent =
+      formatMoney(Number(data.recurring || 0));
+
+    const previousTotal =
+      Number(data.previousTotal || 0);
+
+    const difference =
+      Number(data.difference || 0);
+
+    const differencePercent =
+      data.differencePercent;
+
+    statsCompare.className =
+      'stats-compare same';
+
+    if (previousTotal <= 0) {
+      statsCompare.textContent =
+        'За предыдущий месяц нет расходов для сравнения.';
+    } else if (difference > 0) {
+      statsCompare.className =
+        'stats-compare up';
+
+      statsCompare.textContent =
+        `На ${formatMoney(Math.abs(difference))}` +
+        (differencePercent !== null && differencePercent !== undefined
+          ? ` (+${Math.abs(Number(differencePercent))}%)`
+          : '') +
+        ' больше предыдущего месяца';
+    } else if (difference < 0) {
+      statsCompare.className =
+        'stats-compare down';
+
+      statsCompare.textContent =
+        `На ${formatMoney(Math.abs(difference))}` +
+        (differencePercent !== null && differencePercent !== undefined
+          ? ` (${Math.abs(Number(differencePercent))}%)`
+          : '') +
+        ' меньше предыдущего месяца';
+    } else {
+      statsCompare.textContent =
+        'Столько же, сколько в предыдущем месяце.';
+    }
+
+    const categories =
+      Array.isArray(data.byCategory)
+        ? data.byCategory
+        : [];
+
+    if (!categories.length) {
+      statsCategories.innerHTML =
+        '<div class="stats-empty">За этот месяц расходов нет.</div>';
+      return;
+    }
+
+    statsCategories.innerHTML = '';
+
+    categories.forEach(item => {
+      const percent = Math.max(
+        0,
+        Math.min(100, Number(item.percent || 0))
+      );
+
+      const row = document.createElement('div');
+      row.className = 'stats-category-row';
+
+      row.innerHTML = `
+        <div class="stats-category-head">
+          <div class="stats-category-name">
+            ${escapeHtml(item.category || 'Без категории')}
+          </div>
+          <div class="stats-category-amount">
+            ${escapeHtml(formatMoney(Number(item.amount || 0)))}
+          </div>
+        </div>
+
+        <div class="stats-category-meta">
+          ${escapeHtml(String(percent))}% ·
+          операций: ${escapeHtml(String(Number(item.count || 0)))}
+        </div>
+
+        <div class="stats-bar-track">
+          <div
+            class="stats-bar-fill"
+            style="width:${percent}%"
+          ></div>
+        </div>
+      `;
+
+      statsCategories.appendChild(row);
+    });
+  }
+
+
+  async function loadStats() {
+    statsLoading.style.display = 'block';
+    statsContent.style.display = 'none';
+    statsMonthTitle.textContent =
+      formatStatsMonth(selectedStatsMonth);
+
+    try {
+      const params = new URLSearchParams();
+      params.set('action', 'stats');
+      params.set('month', selectedStatsMonth);
+      params.set('t', String(Date.now()));
+
+      const response = await fetch(
+        `${API_URL}?${params.toString()}`,
+        {
+          method: 'GET',
+          cache: 'no-store'
+        }
+      );
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        throw new Error(
+          data.error ||
+          'Не удалось загрузить статистику'
+        );
+      }
+
+      renderStats(data);
+      statsContent.style.display = 'block';
+
+    } catch (error) {
+      statsContent.style.display = 'block';
+      statsTotal.textContent = '—';
+      statsCount.textContent = '';
+      statsVariable.textContent = '—';
+      statsRecurring.textContent = '—';
+      statsCompare.className = 'stats-compare same';
+      statsCompare.textContent = error.message;
+      statsCategories.innerHTML = '';
+
+    } finally {
+      statsLoading.style.display = 'none';
+    }
+  }
+
+
+  statsPrevMonth.addEventListener(
+    'click',
+    () => {
+      selectedStatsMonth =
+        shiftMonthValue(selectedStatsMonth, -1);
+
+      loadStats();
+    }
+  );
+
+
+  statsNextMonth.addEventListener(
+    'click',
+    () => {
+      selectedStatsMonth =
+        shiftMonthValue(selectedStatsMonth, 1);
+
+      loadStats();
+    }
+  );
+
+
   function showScreen(name) {
-    addScreen.classList
-      .toggle(
-        'active',
-        name === 'add'
-      );
+    addScreen.classList.toggle(
+      'active',
+      name === 'add'
+    );
 
-    expensesScreen.classList
-      .toggle(
-        'active',
-        name === 'expenses'
-      );
+    expensesScreen.classList.toggle(
+      'active',
+      name === 'expenses'
+    );
 
-    navAdd.classList
-      .toggle(
-        'active',
-        name === 'add'
-      );
+    statsScreen.classList.toggle(
+      'active',
+      name === 'stats'
+    );
 
-    navExpenses.classList
-      .toggle(
-        'active',
-        name === 'expenses'
-      );
+    navAdd.classList.toggle(
+      'active',
+      name === 'add'
+    );
+
+    navExpenses.classList.toggle(
+      'active',
+      name === 'expenses'
+    );
+
+    navStats.classList.toggle(
+      'active',
+      name === 'stats'
+    );
 
     if (name === 'expenses') {
       loadExpenses();
+    }
+
+    if (name === 'stats') {
+      loadStats();
     }
   }
 
@@ -2109,6 +2624,14 @@ async function loadExpenses() {
     'click',
     () => {
       showScreen('expenses');
+    }
+  );
+
+
+  navStats.addEventListener(
+    'click',
+    () => {
+      showScreen('stats');
     }
   );
 
