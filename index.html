@@ -2466,19 +2466,52 @@ function apiDateToDisplay(value) {
   return `${match[3]}/${match[2]}/${match[1]}`;
 }
 
-  filterFrom.addEventListener(
+ function syncDateButton(input, button) {
+  button.textContent =
+    input.value
+      ? apiDateToDisplay(input.value)
+      : 'ДД/ММ/ГГГГ';
+}
+
+
+filterFrom.addEventListener(
+  'input',
+  () => {
+    syncDateButton(
+      filterFrom,
+      filterFromButton
+    );
+  }
+);
+
+filterFrom.addEventListener(
   'change',
   () => {
-    filterFromDisplay.value =
-      apiDateToDisplay(filterFrom.value);
+    syncDateButton(
+      filterFrom,
+      filterFromButton
+    );
+  }
+);
+
+
+filterTo.addEventListener(
+  'input',
+  () => {
+    syncDateButton(
+      filterTo,
+      filterToButton
+    );
   }
 );
 
 filterTo.addEventListener(
   'change',
   () => {
-    filterToDisplay.value =
-      apiDateToDisplay(filterTo.value);
+    syncDateButton(
+      filterTo,
+      filterToButton
+    );
   }
 );
 
@@ -2498,19 +2531,29 @@ function apiDateToDisplay(value) {
   return `${match[3]}/${match[2]}/${match[1]}`;
 }
 
-  function openDatePicker(input) {
+ function openDatePicker(input, button) {
   if (typeof input.showPicker === 'function') {
     input.showPicker();
   } else {
     input.click();
   }
+
+  setTimeout(() => {
+    syncDateButton(
+      input,
+      button
+    );
+  }, 300);
 }
 
 
 filterFromButton.addEventListener(
   'click',
   () => {
-    openDatePicker(filterFrom);
+    openDatePicker(
+      filterFrom,
+      filterFromButton
+    );
   }
 );
 
@@ -2518,10 +2561,12 @@ filterFromButton.addEventListener(
 filterToButton.addEventListener(
   'click',
   () => {
-    openDatePicker(filterTo);
+    openDatePicker(
+      filterTo,
+      filterToButton
+    );
   }
 );
-
 
 filterFrom.addEventListener(
   'change',
