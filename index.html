@@ -148,6 +148,25 @@
       font-weight: 700;
     }
 
+    .date-picker-wrap {
+  position: relative;
+}
+
+.date-display {
+  width: 100%;
+  pointer-events: none;
+  background: #fff;
+}
+
+.native-date-picker {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
     button {
       font: inherit;
     }
@@ -570,24 +589,44 @@
 
     <div id="customPeriod" class="custom-period">
       <div>
-        <label for="filterFrom">С</label>
-        <input
-          id="filterFrom"
-          type="text"
-          inputmode="numeric"
-          placeholder="ДД/ММ/ГГГГ"
-          maxlength="10">
-      </div>
+  <label for="filterFrom">С</label>
 
-      <div>
-        <label for="filterTo">По</label>
-        <input
-          id="filterTo"
-          type="text"
-          inputmode="numeric"
-          placeholder="ДД/ММ/ГГГГ"
-          maxlength="10">
-      </div>
+  <div class="date-picker-wrap">
+    <input
+      id="filterFromDisplay"
+      class="date-display"
+      type="text"
+      placeholder="ДД/ММ/ГГГГ"
+      readonly
+    >
+
+    <input
+      id="filterFrom"
+      class="native-date-picker"
+      type="date"
+    >
+  </div>
+</div>
+
+<div>
+  <label for="filterTo">По</label>
+
+  <div class="date-picker-wrap">
+    <input
+      id="filterToDisplay"
+      class="date-display"
+      type="text"
+      placeholder="ДД/ММ/ГГГГ"
+      readonly
+    >
+
+    <input
+      id="filterTo"
+      class="native-date-picker"
+      type="date"
+    >
+  </div>
+</div>
     </div>
 
     <div class="field">
@@ -884,6 +923,12 @@ let selectedPeriod = 'month';
 
   const cancelEdit =
     document.getElementById('cancelEdit');
+
+  const filterFromDisplay =
+  document.getElementById('filterFromDisplay');
+
+const filterToDisplay =
+  document.getElementById('filterToDisplay');
 
 
   function setToday() {
@@ -2211,12 +2256,8 @@ function getPeriodRange(period) {
 
  if (period === 'custom') {
   return {
-    from: displayDateToApi(
-      filterFrom.value
-    ),
-    to: displayDateToApi(
-      filterTo.value
-    )
+    from: filterFrom.value,
+    to: filterTo.value
   };
 }
 
@@ -2275,6 +2316,9 @@ resetFilters.addEventListener(
 
     filterFrom.value = '';
     filterTo.value = '';
+
+    filterFromDisplay.value = '';
+filterToDisplay.value = '';
 
     customPeriod.classList
       .remove('visible');
@@ -2389,6 +2433,38 @@ function apiDateToDisplay(value) {
     input.value = result;
   });
 }
+
+  function apiDateToDisplay(value) {
+  if (!value) {
+    return '';
+  }
+
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (!match) {
+    return value;
+  }
+
+  return `${match[3]}/${match[2]}/${match[1]}`;
+}
+
+  filterFrom.addEventListener(
+  'change',
+  () => {
+    filterFromDisplay.value =
+      apiDateToDisplay(filterFrom.value);
+  }
+);
+
+filterTo.addEventListener(
+  'change',
+  () => {
+    filterToDisplay.value =
+      apiDateToDisplay(filterTo.value);
+  }
+);
 
 formatDateInput(filterFrom);
 formatDateInput(filterTo);
